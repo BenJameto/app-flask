@@ -20,11 +20,11 @@ spec:
         - containerPort: 5432
         env:
         - name: POSTGRES_DB
-          value: hospitaldb
+          value: "hospitaldb"
         - name: POSTGRES_USER
-          value: hospitaluser
+          value: "hospitaluser"
         - name: POSTGRES_PASSWORD
-          value: hospitaluser1234
+          value: "hospitaluser1234"
         volumeMounts:
         - name: postgres-data
           mountPath: /var/lib/postgresql/data
