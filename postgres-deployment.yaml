@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+  namespace: jenkins  # Asegúrate de que ambos (Flask y PostgreSQL) estén en el mismo namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:13  # La misma versión que en Docker Compose
+        ports:
+        - containerPort: 5432
+        env:  # Variables de entorno necesarias para PostgreSQL
+        - name: POSTGRES_DB
+          value: hospitaldb
+        - name: POSTGRES_USER
+          value: hospitaluser
+        - name: POSTGRES_PASSWORD
+          value: hospitaluser1234
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: jenkins
+spec:
+  type: ClusterIP  # ClusterIP para uso interno dentro de Kubernetes
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

@@ -2,8 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app-flask-deployment
+  namespace: jenkins  # Flask y PostgreSQL estan en el mismo namespace
 spec:
-  replicas: 1  
+  replicas: 1
   selector:
     matchLabels:
       app: app-flask
@@ -14,20 +15,32 @@ spec:
     spec:
       containers:
       - name: app-flask
-        image: benjameto/my-flaks-app:latest  # Aimagen a construir
+        image: benjameto/my-flaks-app:latest  # Imagen de Docker que contiene la aplicación Flask
         ports:
         - containerPort: 80
+        env:
+        - name: DB_HOST
+          value: "postgres-service"  # El nombre del servicio de PostgreSQL en Kubernetes
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "hospitaldb"
+        - name: DB_USER
+          value: "hospitaluser"
+        - name: DB_PASSWORD
+          value: "hospitaluser1234"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: app-flask-service
+  namespace: jenkins
 spec:
-  type: NodePort  # Si se usa en Minikube, NodePort es útil para acceder desde fuera del clúster
+  type: NodePort  # Para permitir acceso desde fuera del clúster
   selector:
     app: app-flask
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
-      nodePort: 30008  
+      nodePort: 30008  # Puerto donde se expondrá Flask
